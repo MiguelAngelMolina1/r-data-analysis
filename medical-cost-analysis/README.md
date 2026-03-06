@@ -41,16 +41,16 @@ The primary goals of this analysis are:
 
 ## Repository Structure
 
+```text
 medical-cost-analysis
 ├── README.md
-├── .gitignore
 ├── data
 │   └── README.md
-├── scripts
+├── reports
 │   └── README.md
-└── reports
+└── scripts
     └── README.md
-
+```
 ---
 
 ## Methods Used
