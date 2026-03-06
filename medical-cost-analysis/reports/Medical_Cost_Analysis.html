@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Miguel Molina">
+
+<title>Exploratory_Analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="Medical_Cost_Analysis_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Medical_Cost_Analysis_files/libs/quarto-html/quarto.js"></script>
+<script src="Medical_Cost_Analysis_files/libs/quarto-html/popper.min.js"></script>
+<script src="Medical_Cost_Analysis_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Medical_Cost_Analysis_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Medical_Cost_Analysis_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Medical_Cost_Analysis_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Medical_Cost_Analysis_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Medical_Cost_Analysis_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Medical_Cost_Analysis_files/libs/bootstrap/bootstrap-c0367b04c37547644fece4185067e4a7.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Exploratory_Analysis</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Miguel Molina </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="medical-cost-and-personal-lifestyle" class="level1">
+<h1>Medical Cost and Personal Lifestyle</h1>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction"><strong>Introduction</strong></h2>
+<p>Healthcare costs are a major concern in both individual and policy making contexts. The dataset under study provides detailed information on health insurance charges for a sample of individuals. By analyzing lifestyle and demographic characteristics, we gain the opportunity to explore how personal health translates to a cost. This dataset is from Kaggle at the link below</p>
+<p><a href="https://www.kaggle.com/datasets/mirichoi0218/insurance/discussion?sort=hotness" class="uri">https://www.kaggle.com/datasets/mirichoi0218/insurance/discussion?sort=hotness</a></p>
+<p>In this project, I will perform an exploratory analysis to uncover relationships and patterns in this dataset. After an exploratory analysis I will then build a linear regression model with the aim at predicting insurance charges. The outcome of this analysis will be both predictive and inferential from a series of translations and visualization, thereby providing actionable insights into cost drivers within health insurance.</p>
+</section>
+<section id="focus" class="level2">
+<h2 class="anchored" data-anchor-id="focus"><strong>Focus</strong></h2>
+<p>The main objective of this project is to understand how lifestyle and demographic characteristics affect medical insurance costs. This analysis aims to answer four main questions:</p>
+<ul>
+<li><p>Which variables are the strongest predictors in medical insurance charges?</p></li>
+<li><p>How much does smoking impact medical cost compared to nonsmokers?</p></li>
+<li><p>Does any variable have a linear relationship with insurance costs?</p></li>
+<li><p>Which variables best predict medical insurance charges, and accurately can a regression model explain variations in cost?</p></li>
+</ul>
+</section>
+<section id="description-of-the-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="description-of-the-dataset"><strong>Description of the Dataset</strong></h2>
+<p>This dataset contains information on individual lifestyle and demographic characteristics for 1338 observations. Each row in the dataset corresponds with one individual. The dataset includes several variables commonly associatred with health insurance pricing. The columns in the dataset are:</p>
+<ul>
+<li><p><strong>Age</strong> - age of primary beneficiary</p></li>
+<li><p><strong>Sex</strong> - insurance contractor gender, female, male</p></li>
+<li><p><strong>BMI</strong> - Body mass index, providing an understanding of body, weights that are relatively high or low relative to height, objective index of body weight ideally 18.5 to 24.9</p></li>
+<li><p><strong>Children</strong> - Number of children covered by health insurance / Number of dependents</p></li>
+<li><p><strong>Smoker</strong> - Smoking</p></li>
+<li><p><strong>Region</strong> - the beneficiary’s residential area in the US, northeast, southeast, southwest, northwest.</p></li>
+<li><p><strong>Charges</strong> - Individual medical costs billed by health insurance</p></li>
+</ul>
+<p>These variables can be used to explore how personal characteristics influence medical costs and to build predictive regression models.</p>
+</section>
+<section id="exploratory-analysis-of-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="exploratory-analysis-of-dataset"><strong>Exploratory Analysis of Dataset</strong></h2>
+<section id="data-structure-and-summary" class="level3">
+<h3 class="anchored" data-anchor-id="data-structure-and-summary">Data Structure and Summary</h3>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Structure of the dataset:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'data.frame':   1338 obs. of  7 variables:
+ $ age     : int  19 18 28 33 32 31 46 37 37 60 ...
+ $ sex     : Factor w/ 2 levels "female","male": 1 2 2 2 2 1 1 1 2 1 ...
+ $ bmi     : num  27.9 33.8 33 22.7 28.9 ...
+ $ children: int  0 1 3 0 0 0 1 3 2 0 ...
+ $ smoker  : Factor w/ 2 levels "no","yes": 2 1 1 1 1 1 1 1 1 1 ...
+ $ region  : Factor w/ 4 levels "northeast","northwest",..: 4 3 3 2 2 3 3 2 1 2 ...
+ $ charges : num  16885 1726 4449 21984 3867 ...</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Summary of statistics for all variables:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      age            sex           bmi           children     smoker    
+ Min.   :18.00   female:662   Min.   :15.96   Min.   :0.000   no :1064  
+ 1st Qu.:27.00   male  :676   1st Qu.:26.30   1st Qu.:0.000   yes: 274  
+ Median :39.00                Median :30.40   Median :1.000             
+ Mean   :39.21                Mean   :30.66   Mean   :1.095             
+ 3rd Qu.:51.00                3rd Qu.:34.69   3rd Qu.:2.000             
+ Max.   :64.00                Max.   :53.13   Max.   :5.000             
+       region       charges     
+ northeast:324   Min.   : 1122  
+ northwest:325   1st Qu.: 4740  
+ southeast:364   Median : 9382  
+ southwest:325   Mean   :13270  
+                 3rd Qu.:16640  
+                 Max.   :63770  </code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Medical_Cost_Analysis_files/figure-html/Structure_and_Summary-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The dataset contains <strong>1,338 insured individuals</strong> with 7 variables describing demographics, health behavior, and annual medical charges. There are <strong>no missing values</strong>, and most categorical variables are well-balanced. The average age is approximately <strong>39 years</strong>, and BMI centers around <strong>30</strong>, which places the typical individual in the <strong>overweight</strong> range. Medical charges are <strong>strongly right-skewed</strong>, with a median of around <strong>$9,382</strong> but a maximum exceeding <strong>$63,000</strong>, indicating that a small number of individuals drive exceptionally high healthcare costs.</p>
+<p>A <strong>correlation heatmap</strong> was generated to explore the strength of relationships among the numeric variables. Smoking status (encoded as a binary indicator), BMI, and age show the <strong>strongest positive correlations</strong> with medical charges. Meanwhile, the number of children displays only a <strong>very weak relationship</strong>, suggesting minimal impact on spending. These findings are consistent with the patterns observed in the exploratory scatterplots and box plots.</p>
+<p>Together, the summary statistics and heat map provide strong evidence that <strong>smoking status</strong>, <strong>age</strong>, and <strong>BMI</strong> should be prioritized as key predictors in the regression modeling phase, whereas variables such as <strong>children, region</strong> and <strong>sex</strong> likely have a much smaller influence on medical cost variation.Univariate Distributions</p>
+</section>
+</section>
+<section id="univariate-distributions" class="level2">
+<h2 class="anchored" data-anchor-id="univariate-distributions"><strong>Univariate Distributions</strong></h2>
+<section id="numeric-variable-distributions" class="level3">
+<h3 class="anchored" data-anchor-id="numeric-variable-distributions">Numeric Variable Distributions</h3>
+<section id="age-and-bmi-analysis" class="level4">
+<h4 class="anchored" data-anchor-id="age-and-bmi-analysis">Age and BMI Analysis</h4>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Medical_Cost_Analysis_files/figure-html/Univariate-Age_and_BMI-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The age distribution (figure 1) shows that most individuals are between 18-45, with nearly uniform distribution across adult ages. Younger adults 18-23 form the largest group. This suggests health care usage is being studies across a wide range of ages, which may contribute differently to medical costs.</p>
+<p>The BMI distribution (figure 2) appears slightly right skewed, with most individuals falling between 25-35, indicating most observations are overweight. The long right tail indicates some individuals may be in the obese category, with few observations under a 20 BMI. The non normality may have a nonlinear relationship with charges.</p>
+</section>
+</section>
+<section id="children-and-region-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="children-and-region-analysis">Children and Region Analysis</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Medical_Cost_Analysis_files/figure-html/Univariate-Children_and_Region-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The distribution for the number of children (figure 3) observations have shows that most individuals have 0 to 2 children, with very few outliers having a maximum of 4 children. This suggests that medical costs for people with larger families may be relatively uncommon.</p>
+<p>The distribution of medical charges (figure 4) is strongly right skewed, with most individuals incurring relatively low to moderate expenses, while smaller portion experience extremely high medical costs. This may suggest certain lifestyle or demographic characteristics affect a minority of individuals, but dramatically increases spending. This skewness indicates that features of this dataset may no form a linear relationship with charges.</p>
+</section>
+</section>
+<section id="categorical-variable-distributions" class="level2">
+<h2 class="anchored" data-anchor-id="categorical-variable-distributions"><strong>Categorical Variable Distributions</strong></h2>
+<section id="sex-and-smoker-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="sex-and-smoker-analysis">Sex and Smoker Analysis</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Medical_Cost_Analysis_files/figure-html/Univariate-Sex_and_Smoker-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The dataset includes both male and female individuals (figure 5)with a nearly equal distribution between the two groups. This balance ensures that sex related influences on medical costs can be compared without major sampling bias. Based on this distribution, sex may still contribute to costs, however both categories are similarity represents making it very unlikely sex will be a dominant predictor of costs.</p>
+<p>The dataset also includes both smoker and nonsmoker individuals (figure 6), with nonsmokers as the dominant of the two with over 3 times as many smokers. This variable is expected to strongly influence medical charges due to known health risks associated with smoking., This imbalance suggests that smoking status is likely a major contributing factor to the unusual high charges seen in the the right skewed charges distribution.</p>
+</section>
+<section id="region-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="region-analysis">Region Analysis</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Medical_Cost_Analysis_files/figure-html/Univariate-Region-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The dataset is distributed fairly evenly across the four U.S. geographical regions (northeast, northwest, southeast, and southwest), with no region overwhelmingly overepresented. This balanced distribution suggests that regional differences in healthcare cost can be compared without strong sampling bias. However, since region reflects broad geographic location rather than specific health factors, it is expected to have only a minor influence on medical charges compared to variables like smoking status, age, and BMI.</p>
+</section>
+</section>
+<section id="bivariate-distributions" class="level2">
+<h2 class="anchored" data-anchor-id="bivariate-distributions"><strong>Bivariate Distributions</strong></h2>
+<p>The question we aim to answer with these distributions, is how exactly do lifestyle and demographic characteristics relates to medical charges specifically.</p>
+<section id="smoker-vs-charges" class="level3">
+<h3 class="anchored" data-anchor-id="smoker-vs-charges">Smoker vs Charges</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Medical_Cost_Analysis_files/figure-html/Bivariate-Smoker_Charges-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The boxplot (figure 8) clearly shows a dramatic difference in healthcare spending between smokers and non-smokers. Smokers exhibit a significantly higher median medical charge, approximately three to four times greater than that of non-smokers. In addition, the variability among smokers is much larger, with many high-cost outliers reaching above $50,000 in annual charges. These extreme values indicate that smokers are more likely to incur major healthcare expenses.</p>
+<p>Non-smokers, in contrast, cluster tightly toward the lower end of the cost range with relatively few large outliers. This suggests more predictable and generally lower medical spending.</p>
+<p>Overall, smoking status appears to be one of the <strong>most influential drivers of cost</strong> in the dataset, substantially increasing both the average and potential maximum healthcare expenditure.</p>
+</section>
+<section id="age-vs-charges" class="level3">
+<h3 class="anchored" data-anchor-id="age-vs-charges">Age vs Charges</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Medical_Cost_Analysis_files/figure-html/Bivariate-Age_Charges-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The Age and Charges scatterplot (figure 9) shows a positive relationship between age and medical charges. Older individuals tend to accumulate higher healthcare expenses, likely due to increasing health risks and medical needs associated with aging. However, there is substantial variability in charges within all age groups, indicating that age alone does not fully predict medical cost. Some younger individuals still incur high costs, while some older individuals maintain relatively low charges. This suggests that age is an important factor, but not the only one influencing medical expenses.</p>
+<p>The Age and Charges scatterplot factored by smoker (figure 10), show a clear distinction between non smokers and smokers as age increases. While charges rise with age for both groups, smokers consistently incur significantly higher medical costs at nearly every age. Additionally, the gap in charges between smokers and non-smokers widens among older individuals, indicating a possible interaction effect where smoking amplifies the age related increase in healthcare spending. This reinforces the finding that smoking status is a major driver of cost and likely interacts with other factors such as age and BMI.</p>
+</section>
+<section id="bmi-vs-charges" class="level3">
+<h3 class="anchored" data-anchor-id="bmi-vs-charges">BMI vs Charges</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Medical_Cost_Analysis_files/figure-html/Bivariate-BMI_Charges-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This scatterplot (figure 11) suggests a moderate positive relationship between BMI and medical charges. Individuals with higher BMI values tend to incur greater healthcare expenses. However, the relationship is not strictly linear: many people with elevated BMI still have relatively low charges, especially those who do not smoke. The broad vertical spread of costs at each BMI level indicates that BMI alone does not fully explain medical spending differences. While obesity is associated with increased medical needs, other factors such as lifestyle and pre-existing health conditions likely interact with BMI to drive overall cost.</p>
+</section>
+<section id="sex-vs-charges" class="level3">
+<h3 class="anchored" data-anchor-id="sex-vs-charges">Sex vs Charges</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Medical_Cost_Analysis_files/figure-html/Bivariate-Sex_Charges-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The overall distribution (figure 13) of medical charges appears very similar between males and females. Both groups show a wide range of costs and a large number of high-cost outliers, particularly above $30,000. Although males exhibit a slightly higher median cost in this visualization, the difference is small and the interquartile ranges strongly overlap. This suggests that sex alone is not a major predictor of medical spending. Any differences between male and female charges are likely influenced by other variables rather than gender itself.</p>
+<p>When smoking status is considered (figure 14), a much clearer pattern emerges. For both males and females, smokers consistently incur much higher charges than non-smokers. The largest costs in the dataset occur among male smokers, but female smokers also have substantially elevated costs compared to non-smokers.</p>
+</section>
+<section id="children-vs-charges" class="level3">
+<h3 class="anchored" data-anchor-id="children-vs-charges">Children vs Charges</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Medical_Cost_Analysis_files/figure-html/Bivariate-Children_Charges-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This scatterplot (figure 15) shows how medical charges vary by the number of children a person has. Overall, there does not appear to be a strong relationship between dependents and healthcare spending. Individuals with zero children display the widest range of charges, including many high-cost cases, while individuals with one to three children show only a slight upward shift in average charges. However, the differences are small and the distributions at each level overlap significantly.</p>
+</section>
+<section id="region-vs-charges" class="level3">
+<h3 class="anchored" data-anchor-id="region-vs-charges">Region vs Charges</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Medical_Cost_Analysis_files/figure-html/Bivariate-Region_Charges-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>These box plots (figure 16) show how medical charges vary by the different regions. There does not appear to be a string relationship between regions and healthcare spending. Individuals from the southeast display the widest range reaching an upper quartile of $20,000. While individuals from the northeast and northwest show a slight forward shift, the differences are small. Each level overlaps significantly and overall has little affect to charges as all regions contain outliers reaching as high as 50,000.</p>
+</section>
+<section id="risk-profile" class="level3">
+<h3 class="anchored" data-anchor-id="risk-profile">Risk Profile</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Medical_Cost_Analysis_files/figure-html/Risk_Profile-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This visualization classifies individuals into three health risk groups based on a combination of <strong>smoking status</strong>, <strong>BMI</strong>, and <strong>age</strong> analyzed to be the strongest factors contributing to health care spending.</p>
+<p>A clear pattern emerges:</p>
+<ul>
+<li><p><strong>High-Risk individuals (blue)</strong> — smokers with BMI ≥ 28 and age ≥ 45 — consistently exhibit the <strong>highest medical charges</strong>, with many costs exceeding <strong>$40,000–$60,000</strong>.</p></li>
+<li><p><strong>Medium-Risk individuals (green)</strong> — those not meeting all high risk criteria — dominate the dataset and show a wide spread in charges, but their costs are typically <strong>lower and more variable</strong>.</p></li>
+<li><p><strong>Low-Risk individuals (red)</strong> — non-smokers with lower BMI and younger age — remain clustered near the <strong>lowest charge</strong> values, indicating minimal healthcare expenditures.</p></li>
+</ul>
+<p>The separation of blue markers from both red and green suggests that combining <strong>multiple health behaviors and characteristics</strong> creates far greater cost risk than any one factor alone.</p>
+<p>Overall, this plot demonstrates a <strong>cumulative effect</strong> of smoking, obesity, and aging — individuals with multiple risk factors are significantly more likely to incur extremely high medical costs.</p>
+</section>
+</section>
+<section id="standard-linear-regression" class="level2">
+<h2 class="anchored" data-anchor-id="standard-linear-regression"><strong>Standard Linear Regression</strong></h2>
+<p>In a regression model, there are key values to look for when conducting an analysis:</p>
+<ul>
+<li><p><strong>Estimate</strong> represents how much the predicted medical charges change when a given variable increases by one unit, holding all other variables constant.</p></li>
+<li><p><strong>Standard Error</strong> indicates how precise that estimate is, smaller values suggest the model is more confident in that estimate.</p></li>
+<li><p><strong>t-value</strong> measures the strength of the relationship between a variable and the outcome by comparing the estimate to its standard error; a larger t-value means stronger evidence of a meaningful effect.</p></li>
+<li><p><strong>p-value</strong> tells us whether the variable has a statistically significant impact on charges, with values below 0.05 indicating a significant effect.</p></li>
+<li><p><strong>Residuals</strong> represent the differences between predicted and actual medical charges, and their spread helps us assess how well the model fits the data.</p></li>
+<li><p><strong>Residual Standard Error</strong> shows the average prediction error size, while the <strong>R-squared</strong> value tells us what percentage of variation in medical charges is explained by the model — higher values indicate better predictive performance.</p></li>
+</ul>
+<p>Below is the summary behind the <strong>Linear Regression Model</strong>:</p>
+<p>This model uses charges as the target variable with age, BMI, children, smoker, sex, and region as predictors.</p>
+<section id="standard-model-summary" class="level4">
+<h4 class="anchored" data-anchor-id="standard-model-summary"><strong>Standard Model Summary:</strong></h4>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = charges ~ age + bmi + children + smoker + sex + 
+    region, data = dataset)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-11304.9  -2848.1   -982.1   1393.9  29992.8 
+
+Coefficients:
+                Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)     -11938.5      987.8 -12.086  &lt; 2e-16 ***
+age                256.9       11.9  21.587  &lt; 2e-16 ***
+bmi                339.2       28.6  11.860  &lt; 2e-16 ***
+children           475.5      137.8   3.451 0.000577 ***
+smokeryes        23848.5      413.1  57.723  &lt; 2e-16 ***
+sexmale           -131.3      332.9  -0.394 0.693348    
+regionnorthwest   -353.0      476.3  -0.741 0.458769    
+regionsoutheast  -1035.0      478.7  -2.162 0.030782 *  
+regionsouthwest   -960.0      477.9  -2.009 0.044765 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 6062 on 1329 degrees of freedom
+Multiple R-squared:  0.7509,    Adjusted R-squared:  0.7494 
+F-statistic: 500.8 on 8 and 1329 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+</section>
+<section id="residual-summary" class="level4">
+<h4 class="anchored" data-anchor-id="residual-summary"><strong>Residual Summary:</strong></h4>
+<p>The residuals represent the difference between the actual medical charges and the values predicted by the regression model. The distribution shows that most prediction errors <strong>fall between -$2,848 and +$1,395</strong>, indicating that the model performs reasonably well for a majority of individuals.</p>
+<p>The median residual is slightly negative at <strong>-$982</strong>, suggesting a slight over prediction on overage. However, the maximum residual of <strong>nearly +$30,000</strong> shows that there are some patients whose medical costs are far beyond the models prediction, likely due to an extreme high risk profile. Give this large variation in residuals, this model has room for improvement.</p>
+</section>
+<section id="coefficient-summary" class="level4">
+<h4 class="anchored" data-anchor-id="coefficient-summary"><strong>Coefficient Summary:</strong></h4>
+<p>The coefficient estimates measure the expected change in annual medical charges for a one unit increase in each predictor, holding all other variables constant. Smoking status has by far the largest effectm, with smokers incurring approximately <strong>$23,848</strong> more in medical charges than non smokers on average.</p>
+<p>This is a highly significant and practically important increase. Age and BMI also have statistically significant positive effect, with charges increasing by about <strong>$257</strong> per additional year of age and <strong>$339</strong> per additional BMI unit. The number of children shows an impact of about <strong>$476</strong> per additional child, suggesting limited relevance like region and sex.</p>
+<p>In Contrast, sex does not significantly influence charges, with a <strong>p value of 0.69,</strong> and the regional effects are relatively small and inconsistent. Given regional location and sex have high p values, this indicates lifestyle and health related factors are primary drivers of medical spending. This is especially true when the p values are <strong>below 0.05 with age, BMI, and smoking.</strong></p>
+</section>
+<section id="model-fit-summary" class="level4">
+<h4 class="anchored" data-anchor-id="model-fit-summary"><strong>Model Fit Summary:</strong></h4>
+<p>The Residual Standard Error (RSE) is the average prediction error. This factor shows how far predictions are from their true charges, and for a <strong>variance of 75%</strong> the model is only off by <strong>+-$6062</strong>. This is good for the amount of observations and range of medical charges in this dataset. R-Squared as the variation covered in this model is relatively large for real world healthcare spending data too. The adjusted R-Squared is nearly identical indicating most predictors contribute to predictions and does so without over fitting, however it could be improved. The F-Statistic shows the model is significant overall, meaning that the predictors jointly improve the ability to explain medical expenses far better than a model with no predictors.</p>
+</section>
+<section id="reduced-linear-regression" class="level3">
+<h3 class="anchored" data-anchor-id="reduced-linear-regression"><strong>Reduced Linear Regression</strong></h3>
+<p>Using the summary of the standard Linear Regression Model, including the lowest p values, a reduced Linear Regression Model can be implemented with only the most contributing factors.</p>
+<p>This model will only include charges as the target, and Age, BMI, and Smoking as predictors.</p>
+<p><strong>Reduced Model Summary:</strong></p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = charges ~ age + bmi + smoker, data = dataset)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-12415.4  -2970.9   -980.5   1480.0  28971.8 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -11676.83     937.57  -12.45   &lt;2e-16 ***
+age            259.55      11.93   21.75   &lt;2e-16 ***
+bmi            322.62      27.49   11.74   &lt;2e-16 ***
+smokeryes    23823.68     412.87   57.70   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 6092 on 1334 degrees of freedom
+Multiple R-squared:  0.7475,    Adjusted R-squared:  0.7469 
+F-statistic:  1316 on 3 and 1334 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>The Reduced Linear Regression Model includes only three key predictors of medical charges: <strong>age</strong>, <strong>BMI</strong>, and <strong>smoking status</strong>. All variables remain highly statistically significant (p &lt; 2e-16), indicating strong evidence that each one influences medical spending. Smoking has the largest impact, with smokers paying an estimated <strong>$23,824 more per year</strong> than non-smokers. Increases in age and BMI are also associated with higher charges, adding approximately <strong>$259</strong> and <strong>$323</strong> respectively for each additional unit.</p>
+<p>The model explains <strong>74.75% of the variation</strong> in medical charges (R² = 0.7475), which is only slightly lower than the full model that included additional predictors. The Residual Standard Error of <strong>$6,092</strong> shows that prediction errors remain similar in magnitude to those from the full model, indicating that removing sex, region, and number of children did <strong>not</strong> result in a meaningful loss of accuracy.</p>
+<p>Overall, the reduced model is a more efficient and interpretative model that preserves strong predictive performance while focusing on the most impactful health-related variables.</p>
+</section>
+<section id="lasso-regression" class="level3">
+<h3 class="anchored" data-anchor-id="lasso-regression">LASSO Regression</h3>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Cross Validation for The Best Parameter:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>The Simplest Good Model:
+ This is the largest lambda within 1 standard error of the minimum</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 641.7686</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>The Most Accurate LASSO Model:
+ This is the lmabda value that produces the lowest cross validated error</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 68.81475</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Below are the LASSO coefficients using the most accurate model:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>9 x 1 sparse Matrix of class "dgCMatrix"
+                 lambda.min
+(Intercept)     -11566.9509
+age                252.9685
+bmi                322.5230
+smokeryes        23659.0540
+children           418.4946
+regionnorthwest      .     
+regionsoutheast   -547.1304
+regionsouthwest   -513.6591
+sexmale              .     </code></pre>
+</div>
+</div>
+<p><strong>LASSO Regression Summary:</strong></p>
+<p>The LASSO regression was fitted using cross validation to identify the most important predictors of medical charges. Using lambda as our optimal penalty value, LASSO retained age, bmi, smoking status, and number of children as relevant predictors. Smoking like the standard and reduced linear model remained the strongest contributor, with smokers predicted to spend about $23,659 more. Age and BMI remained strongly influential, consistent with the other models as well.</p>
+<p>The coefficients for sex and region northwest were shrunk to zero, indicating that these variables provide no meaningful value to the model. Southeast, and southwest remained present, but had little to now affect confirming regional differences have only minor effects. Overall, LASSO results support the reduced linear model by idenitifying age, bmi, and smoking as the primary drivers of medical charges, while suggesting demographic variables only have minor prediction accuracy contributions.</p>
+</section>
+</section>
+<section id="focus-questions-answered" class="level2">
+<h2 class="anchored" data-anchor-id="focus-questions-answered">Focus Questions Answered</h2>
+<p>The main objective of this project was to understand how lifestyle and demographic characteristics affect medical insurance costs. After this analysis and applying the dataset to a Linear Regression Model in multiple ways:</p>
+<ul>
+<li><p>Which variables are the strongest predictors in medical insurance charges?</p>
+<ul>
+<li>The most influential predictors in this dataset are age, BMI, and smoking. These predictors represented the greatest influential factors contributing to medical charges with p values nearly at zero. Analyzing these predictors by a per unit margin, age showcased a $257 increase per unit of age, a $339 increase per unit of bmi, and a $23,000+ charge if individuals are smokers.</li>
+</ul></li>
+<li><p>How much does smoking impact medical cost compared to nonsmokers?</p>
+<ul>
+<li>Smoking is the primary driver of medical cost in this dataset, and the model estimated that smokers incur over $23,000 more compared to that of a nonsmoker. This dramatic difference suggest smoking is the most important behavioral factor influencing medical costs in this dataset.</li>
+</ul></li>
+<li><p>Does any variable have a linear relationship with insurance costs?</p>
+<ul>
+<li>There were two variables that had a prominent linear relationship with insurance cost. This distinction was strong and clear when analyzing scatter plots, and the strength of their coefficients. These two variables were Age, and BMI, both of which showed a positive linear associated in a per unit margin. These findings align with medical expectations as greater age and NMI correlate to increased health risks and as a result more medical charges.</li>
+</ul></li>
+<li><p>Which variables best predict medical insurance charges, and accurately can a regression model explain variations in cost?</p>
+<ul>
+<li>The variables that best predict medical insurance charges are smoking, BMI, and age. The reduced linear regression model explained 74.75% of the variation in medical charges (R² = 0.7475), with all predictors highly significant (p &lt; 2e-16). Smoking produced the largest effect, increasing annual charges by more than $23,800, while BMI and age contributed moderate linear increases. LASSO regression confirmed these findings by selecting the same three predictors and shrinking sex and region coefficients to zero. Overall, age, BMI, and smoking are the dominant drivers of medical cost in this dataset.</li>
+</ul></li>
+</ul>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>In summary, this analysis shows that medical insurance charges are primarily driven by three key factors: smoking status, BMI, and age. The reduced linear regression model explained nearly 75% of the variation in medical costs (R² = 0.7475), with all three predictors showing strong statistical significance. Smoking had the largest impact, increasing charges by more than $23,000, while both age and BMI demonstrated clear linear relationships with cost. LASSO regression confirmed these findings by selecting the same predictors and shrinking less informative variables, such as sex and region, toward zero. Overall, the results indicate that lifestyle and health-related variables are far more important than demographic characteristics in determining medical insurance expenses.</p>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<p>Badrali, Mehmet. “<em>Linear Regression in R: A Step-by-Step Guide</em>.” <em>DataCamp</em>, <a href="https://www.datacamp.com/tutorial/linear-regression-R" class="uri">https://www.datacamp.com/tutorial/linear-regression-R</a>.</p>
+<p>“LASSO Regression in R (Step-by-Step).” <em>Statology</em>, <a href="https://www.statology.org/lasso-regression-in-r/" class="uri">https://www.statology.org/lasso-regression-in-r/</a>.</p>
+<p>James, Gareth, et al.&nbsp;<em>An Introduction to Statistical Learning</em>. 2nd ed., Springer, 2021.</p>
+<p>Mirichoi0218. “<em>Medical Cost Personal Dataset</em>.” <em>Kaggle</em>, <a href="https://www.kaggle.com/datasets/mirichoi0218/insurance/data" class="uri">https://www.kaggle.com/datasets/mirichoi0218/insurance/data</a>.</p>
+<p>Wei, Taiyun, and Viliam Šimko. “<em>corrplot: Visualization of a Correlation Matrix</em>.” <em>CRAN</em>, 2024, <a href="https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html" class="uri">https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html</a>.</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
