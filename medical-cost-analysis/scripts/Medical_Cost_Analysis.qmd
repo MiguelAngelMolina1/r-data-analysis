@@ -1,0 +1,506 @@
+---
+title: "Exploratory_Analysis"
+author: "Miguel Molina"
+format: html
+editor: visual
+---
+
+# Medical Cost and Personal Lifestyle
+
+## **Introduction**
+
+Healthcare costs are a major concern in both individual and policy making contexts. The dataset under study provides detailed information on health insurance charges for a sample of individuals. By analyzing lifestyle and demographic characteristics, we gain the opportunity to explore how personal health translates to a cost. This dataset is from Kaggle at the link below
+
+<https://www.kaggle.com/datasets/mirichoi0218/insurance/discussion?sort=hotness>
+
+In this project, I will perform an exploratory analysis to uncover relationships and patterns in this dataset. After an exploratory analysis I will then build a linear regression model with the aim at predicting insurance charges. The outcome of this analysis will be both predictive and inferential from a series of translations and visualization, thereby providing actionable insights into cost drivers within health insurance.
+
+## **Focus**
+
+The main objective of this project is to understand how lifestyle and demographic characteristics affect medical insurance costs. This analysis aims to answer four main questions:
+
+-   Which variables are the strongest predictors in medical insurance charges?
+
+-   How much does smoking impact medical cost compared to nonsmokers?
+
+-   Does any variable have a linear relationship with insurance costs?
+
+-   Which variables best predict medical insurance charges, and accurately can a regression model explain variations in cost?
+
+## **Description of the Dataset**
+
+This dataset contains information on individual lifestyle and demographic characteristics for 1338 observations. Each row in the dataset corresponds with one individual. The dataset includes several variables commonly associatred with health insurance pricing. The columns in the dataset are:
+
+-   **Age** - age of primary beneficiary
+
+-   **Sex** - insurance contractor gender, female, male
+
+-   **BMI** - Body mass index, providing an understanding of body, weights that are relatively high or low relative to height, objective index of body weight ideally 18.5 to 24.9
+
+-   **Children** - Number of children covered by health insurance / Number of dependents
+
+-   **Smoker** - Smoking
+
+-   **Region** - the beneficiary's residential area in the US, northeast, southeast, southwest, northwest.
+
+-   **Charges** - Individual medical costs billed by health insurance
+
+These variables can be used to explore how personal characteristics influence medical costs and to build predictive regression models.
+
+## **Exploratory Analysis of Dataset**
+
+```{r Setup, echo=FALSE, message=FALSE, results="hide"}
+#libraries needed 
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(scales)
+library(patchwork)
+library(corrplot) #Corelation Plot 
+library(glmnet) #Lasso Regression
+
+#Read from csv file
+dataset <- read.csv("insurance.csv", header = TRUE, stringsAsFactors = T)
+colnames(dataset)
+
+#Overview
+head(dataset, 5)
+str(dataset)
+summary(dataset)
+```
+
+### Data Structure and Summary
+
+```{r Structure_and_Summary, echo=FALSE}
+# Structure of the dataset
+cat("Structure of the dataset:")
+str(dataset)
+
+# Summary statistics for numeric variables
+cat("Summary of statistics for all variables:")
+summary(dataset)
+
+# Convert smoker to numeric for correlation analysis
+dataset$smoker_num <- ifelse(dataset$smoker == "yes", 1, 0)
+
+# Create numeric-only correlation matrix
+numeric_vars <- dataset[, c("age", "bmi", "children", "charges", "smoker_num")]
+cor_matrix <- cor(numeric_vars)
+
+# Correlation Heatmap (Numerical Values)
+corrplot(cor_matrix,
+         method = "color",
+         addCoef.col = "black",
+         tl.col = "black",
+         tl.srt = 45,
+         title = "Correlation Heatmap of Numeric Variables", 
+          mar = c(0,0,2,0))
+
+
+```
+
+The dataset contains **1,338 insured individuals** with 7 variables describing demographics, health behavior, and annual medical charges. There are **no missing values**, and most categorical variables are well-balanced. The average age is approximately **39 years**, and BMI centers around **30**, which places the typical individual in the **overweight** range. Medical charges are **strongly right-skewed**, with a median of around **\$9,382** but a maximum exceeding **\$63,000**, indicating that a small number of individuals drive exceptionally high healthcare costs.
+
+A **correlation heatmap** was generated to explore the strength of relationships among the numeric variables. Smoking status (encoded as a binary indicator), BMI, and age show the **strongest positive correlations** with medical charges. Meanwhile, the number of children displays only a **very weak relationship**, suggesting minimal impact on spending. These findings are consistent with the patterns observed in the exploratory scatter plots and box plots.
+
+Together, the summary statistics and heat map provide strong evidence that **smoking status**, **age**, and **BMI** should be prioritized as key predictors in the regression modeling phase, whereas variables such as **children, region** and **sex** likely have a much smaller influence on medical cost variation.Univariate Distributions
+
+## **Univariate Distributions**
+
+### Numeric Variable Distributions
+
+#### Age and BMI Analysis
+
+```{r Univariate-Age_and_BMI, echo=FALSE}
+#Numeric Variable Distributions - Age, BMI
+p1_age <- ggplot(dataset, aes(x = age)) +
+  geom_histogram(bins = 100, fill = "lightblue", color="grey20") +
+  labs(title="Age Distribution (Figure 1)", x="Age", y ="Count")
+
+p2_bmi <- ggplot(dataset, aes(x = bmi)) +
+  geom_histogram(bins = 100, fill = "lightgreen", color="grey20") +
+  labs(title="BMI Distribution (Figure 2)", x="BMI", y ="Count")
+
+ 
+# Combine them into one window
+p1_age / p2_bmi
+
+```
+
+The age distribution (figure 1) shows that most individuals are between 18-45, with nearly uniform distribution across adult ages. Younger adults 18-23 form the largest group. This suggests health care usage is being studies across a wide range of ages, which may contribute differently to medical costs.
+
+The BMI distribution (figure 2) appears slightly right skewed, with most individuals falling between 25-35, indicating most observations are overweight. The long right tail indicates some individuals may be in the obese category, with few observations under a 20 BMI. The non normality may have a nonlinear relationship with charges.
+
+### Children and Region Analysis
+
+```{r Univariate-Children_and_Region, echo=FALSE}
+
+#Numeric Variable Distributions - Charges, Children
+
+p3_children <- ggplot(dataset, aes(x = children)) +
+  geom_histogram(bins = 6, fill = "lightyellow", color="grey20") +
+  labs(title="Children Distribution (Figure 3)", x="Number of Children", y ="Count")
+
+p4_charges <- ggplot(dataset, aes(x = charges)) +
+  geom_histogram(bins = 100, fill = "lightpink", color="grey20") +
+  labs(title="Charges Distribution (Figure 4)", x="Cost", y ="Count")
+
+# Combine them into one window (3 rows)
+p3_children / p4_charges
+
+```
+
+The distribution for the number of children (figure 3) observations have shows that most individuals have 0 to 2 children, with very few outliers having a maximum of 4 children. This suggests that medical costs for people with larger families may be relatively uncommon.
+
+The distribution of medical charges (figure 4) is strongly right skewed, with most individuals incurring relatively low to moderate expenses, while smaller portion experience extremely high medical costs. This may suggest certain lifestyle or demographic characteristics affect a minority of individuals, but dramatically increases spending. This skewness indicates that features of this dataset may no form a linear relationship with charges.
+
+## **Categorical Variable Distributions**
+
+### Sex and Smoker Analysis
+
+```{r Univariate-Sex_and_Smoker, echo=FALSE}
+
+#Categorical Variable Distributions - Sex, Smoker
+p5_sex <- ggplot(dataset, aes(x=sex)) +
+  geom_bar(fill="powderblue") +
+  labs(title="Sex Distribution (Figure 5)", x="Sex", y="Count")
+
+p6_smoker <- ggplot(dataset, aes(x=smoker)) +
+  geom_bar(fill="red4") +
+  labs(title="Smoker Distribution (Figure 6)", x="Choice", y="Count")
+
+#Combine to one window
+p5_sex / p6_smoker 
+
+```
+
+The dataset includes both male and female individuals (figure 5)with a nearly equal distribution between the two groups. This balance ensures that sex related influences on medical costs can be compared without major sampling bias. Based on this distribution, sex may still contribute to costs, however both categories are similarity represents making it very unlikely sex will be a dominant predictor of costs.
+
+The dataset also includes both smoker and nonsmoker individuals (figure 6), with nonsmokers as the dominant of the two with over 3 times as many smokers. This variable is expected to strongly influence medical charges due to known health risks associated with smoking., This imbalance suggests that smoking status is likely a major contributing factor to the unusual high charges seen in the the right skewed charges distribution.
+
+### Region Analysis
+
+```{r Univariate-Region, echo=FALSE}
+
+#Categorical Variable Distributions - Region
+
+p7_region <- ggplot(dataset, aes(x=region)) +
+  geom_bar(fill=c("navyblue", "darkred", "grey", "slateblue"), color="black") +
+  labs(title="Region Distribution (Figure 7)", x="Region", y="Count")
+
+p7_region
+```
+
+The dataset is distributed fairly evenly across the four U.S. geographical regions (northeast, northwest, southeast, and southwest), with no region overwhelmingly overepresented. This balanced distribution suggests that regional differences in healthcare cost can be compared without strong sampling bias. However, since region reflects broad geographic location rather than specific health factors, it is expected to have only a minor influence on medical charges compared to variables like smoking status, age, and BMI.
+
+## **Bivariate Distributions**
+
+The question we aim to answer with these distributions, is how exactly do lifestyle and demographic characteristics relates to medical charges specifically.
+
+### Smoker vs Charges
+
+```{r Bivariate-Smoker_Charges, echo=FALSE}
+
+#Categorical Variable Distributions - Region
+
+p8_smoke_charges <- ggplot(dataset, aes(x = smoker, y = charges, fill = smoker)) +
+  geom_boxplot() +
+  scale_fill_manual(
+    name = "Smoking",
+    labels = c("No", "Yes"),
+    values = c("lightgreen", "red3")
+  ) +
+  labs(title="Smoking and Charges Distribution (Figure 8)", x="Charges (USD)", y="Choice")
+
+p8_smoke_charges
+
+```
+
+The boxplot (figure 8) clearly shows a dramatic difference in healthcare spending between smokers and non-smokers. Smokers exhibit a significantly higher median medical charge, approximately three to four times greater than that of non-smokers. In addition, the variability among smokers is much larger, with many high-cost outliers reaching above \$50,000 in annual charges. These extreme values indicate that smokers are more likely to incur major healthcare expenses.
+
+Non-smokers, in contrast, cluster tightly toward the lower end of the cost range with relatively few large outliers. This suggests more predictable and generally lower medical spending.
+
+Overall, smoking status appears to be one of the **most influential drivers of cost** in the dataset, substantially increasing both the average and potential maximum healthcare expenditure.
+
+### Age vs Charges
+
+```{r Bivariate-Age_Charges, echo=FALSE}
+
+#Age VS Charges 
+p9_age_charges <- ggplot(dataset, aes(x=age, y=charges)) +
+  geom_point(alpha=0.4, color="turquoise4") +
+  labs(title="Age and Charges Distribution (Figure 9)", x ="Age", y ="Charges")
+
+smoker_age <- dataset %>%
+  select(age, smoker, charges)
+
+#Age by smoker vs Charges 
+p10_age_smoker_charges <- ggplot(smoker_age, aes(x=age, y=charges, color=smoker)) +
+  geom_point(alpha=0.4) +
+  scale_color_manual(values = c("midnightblue", "violetred")) +
+  labs(title="Age and Charges Distribution by Smoker (Figure 10)", x ="Age", y ="Charges", color="Smoker")
+
+
+p9_age_charges / p10_age_smoker_charges
+```
+
+The Age and Charges scatterplot (figure 9) shows a positive relationship between age and medical charges. Older individuals tend to accumulate higher healthcare expenses, likely due to increasing health risks and medical needs associated with aging. However, there is substantial variability in charges within all age groups, indicating that age alone does not fully predict medical cost. Some younger individuals still incur high costs, while some older individuals maintain relatively low charges. This suggests that age is an important factor, but not the only one influencing medical expenses.
+
+The Age and Charges scatterplot factored by smoker (figure 10), show a clear distinction between non smokers and smokers as age increases. While charges rise with age for both groups, smokers consistently incur significantly higher medical costs at nearly every age. Additionally, the gap in charges between smokers and non-smokers widens among older individuals, indicating a possible interaction effect where smoking amplifies the age related increase in healthcare spending. This reinforces the finding that smoking status is a major driver of cost and likely interacts with other factors such as age and BMI.
+
+### BMI vs Charges
+
+```{r Bivariate-BMI_Charges, echo=FALSE}
+
+#BMI vs Charges 
+p_bmi_charges <- ggplot(dataset, aes(x=bmi, y=charges)) + 
+  geom_point(alpha=0.4, color="darkgreen") +
+  labs(title="BMI and Charges Distribution (Figure 11)", x="BMI", y="Charges")
+
+#BMi vs Charges by Smoker
+p_bmi_charges_smoker <- ggplot(dataset, aes(x=bmi, y =charges, color=smoker)) + 
+  geom_point(alpha=0.4) + 
+  scale_color_manual(values = c("darkgreen", "violetred")) +
+  labs(title="BMI and Charges Distribution by Smoker (Figure 12)", x="BMI", y="Charges", color="Smoker")
+
+p_bmi_charges / p_bmi_charges_smoker
+```
+
+This scatterplot (figure 11) suggests a moderate positive relationship between BMI and medical charges. Individuals with higher BMI values tend to incur greater healthcare expenses. However, the relationship is not strictly linear: many people with elevated BMI still have relatively low charges, especially those who do not smoke. The broad vertical spread of costs at each BMI level indicates that BMI alone does not fully explain medical spending differences. While obesity is associated with increased medical needs, other factors such as lifestyle and pre-existing health conditions likely interact with BMI to drive overall cost.
+
+### Sex vs Charges
+
+```{r Bivariate-Sex_Charges, echo=FALSE}
+
+#Sex vs Charges
+p_sex_charges <- ggplot(dataset, aes(x=sex, y=charges)) +
+  geom_boxplot(fill="lightblue") +
+  labs(title="Sex and Charges Distribution (Figure 13)", x="Sex", y="Charges") +
+  coord_flip()
+
+#Sex vs charges by Smoker
+p_sex_smoker_charges <- ggplot(dataset, aes(x=sex, y=charges, fill=smoker)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("plum4", "turquoise4")) +
+  labs(title="Sex and Charges Distribution by Smoker (Figure 14)", x="Sex", y="Charges", fill="Smoker") +
+  coord_flip()
+
+p_sex_charges / p_sex_smoker_charges
+```
+
+The overall distribution (figure 13) of medical charges appears very similar between males and females. Both groups show a wide range of costs and a large number of high-cost outliers, particularly above \$30,000. Although males exhibit a slightly higher median cost in this visualization, the difference is small and the interquartile ranges strongly overlap. This suggests that sex alone is not a major predictor of medical spending. Any differences between male and female charges are likely influenced by other variables rather than gender itself.
+
+When smoking status is considered (figure 14), a much clearer pattern emerges. For both males and females, smokers consistently incur much higher charges than non-smokers. The largest costs in the dataset occur among male smokers, but female smokers also have substantially elevated costs compared to non-smokers.
+
+### Children vs Charges
+
+```{r Bivariate-Children_Charges, echo=FALSE}
+
+#Number children vs Charges 
+ggplot(dataset, aes(x=children, y =charges, color=factor(children))) +
+  geom_jitter(alpha=0.6) +
+  scale_color_brewer(palette = "Dark2") +
+  labs(title="Children and Charges Distribution (Figure 15)", x="Number of Children", y="Charges", color="Children")
+
+
+```
+
+This scatterplot (figure 15) shows how medical charges vary by the number of children a person has. Overall, there does not appear to be a strong relationship between dependents and healthcare spending. Individuals with zero children display the widest range of charges, including many high-cost cases, while individuals with one to three children show only a slight upward shift in average charges. However, the differences are small and the distributions at each level overlap significantly.
+
+### Region vs Charges
+
+```{r Bivariate-Region_Charges, echo=FALSE}
+
+#Region vs Charges
+ggplot(dataset, aes(x=region, y=charges, fill=region)) + 
+  geom_boxplot() +
+  coord_flip() +
+  labs(title="Region Distribution (Figure 16)", x="Region", y="Charges", fill="Region")
+
+
+```
+
+These box plots (figure 16) show how medical charges vary by the different regions. There does not appear to be a string relationship between regions and healthcare spending. Individuals from the southeast display the widest range reaching an upper quartile of \$20,000. While individuals from the northeast and northwest show a slight forward shift, the differences are small. Each level overlaps significantly and overall has little affect to charges as all regions contain outliers reaching as high as 50,000.
+
+### Risk Profile
+
+```{r Risk_Profile, echo=FALSE}
+
+#Different Profiles for highrisk, medium risk, and low risk individuals 
+profile <- dataset %>%
+  select(age, bmi, smoker, charges) %>%
+  mutate(
+    risk_group = case_when(
+      smoker == "yes" & bmi >= 28 & age >= 45 ~ "High-Risk",
+      smoker == "no" & bmi < 27 & age < 30 ~ "Low-Risk",
+      TRUE ~ "Medium-Risk"
+    ),
+    risk_group = factor(risk_group, levels = c("Low-Risk", "Medium-Risk", "High-Risk"))
+  )
+
+#Plot - by age, charges, and risk group
+ggplot(profile, aes(x=age, y = charges, color=risk_group)) +
+  geom_point() +
+  labs(title="Risk Profile Distribution (Smoker, Age, BMI) - (Figure 17)", x="Age", y="Charges", color="Risk Group")
+
+```
+
+This visualization classifies individuals into three health risk groups based on a combination of **smoking status**, **BMI**, and **age** analyzed to be the strongest factors contributing to health care spending.
+
+A clear pattern emerges:
+
+-   **High-Risk individuals (blue)** — smokers with BMI ≥ 28 and age ≥ 45 — consistently exhibit the **highest medical charges**, with many costs exceeding **\$40,000–\$60,000**.
+
+-   **Medium-Risk individuals (green)** — those not meeting all high risk criteria — dominate the dataset and show a wide spread in charges, but their costs are typically **lower and more variable**.
+
+-   **Low-Risk individuals (red)** — non-smokers with lower BMI and younger age — remain clustered near the **lowest charge** values, indicating minimal healthcare expenditures.
+
+The separation of blue markers from both red and green suggests that combining **multiple health behaviors and characteristics** creates far greater cost risk than any one factor alone.
+
+Overall, this plot demonstrates a **cumulative effect** of smoking, obesity, and aging — individuals with multiple risk factors are significantly more likely to incur extremely high medical costs.
+
+## **Standard Linear Regression**
+
+In a regression model, there are key values to look for when conducting an analysis:
+
+-   **Estimate** represents how much the predicted medical charges change when a given variable increases by one unit, holding all other variables constant.
+
+-   **Standard Error** indicates how precise that estimate is, smaller values suggest the model is more confident in that estimate.
+
+-   **t-value** measures the strength of the relationship between a variable and the outcome by comparing the estimate to its standard error; a larger t-value means stronger evidence of a meaningful effect.
+
+-   **p-value** tells us whether the variable has a statistically significant impact on charges, with values below 0.05 indicating a significant effect.
+
+-   **Residuals** represent the differences between predicted and actual medical charges, and their spread helps us assess how well the model fits the data.
+
+-   **Residual Standard Error** shows the average prediction error size, while the **R-squared** value tells us what percentage of variation in medical charges is explained by the model — higher values indicate better predictive performance.
+
+Below is the summary behind the **Linear Regression Model**:
+
+This model uses charges as the target variable with age, BMI, children, smoker, sex, and region as predictors.
+
+```{r Linear Regression Model, echo=FALSE}
+
+model1 <- lm(charges ~ age + bmi + children + smoker + sex + region, data = dataset)
+
+```
+
+#### **Standard Model Summary:**
+
+```{r Standard Model Summary, echo=FALSE}
+
+model_summary <- summary(model1)
+model_summary
+```
+
+#### **Residual Summary:**
+
+The residuals represent the difference between the actual medical charges and the values predicted by the regression model. The distribution shows that most prediction errors **fall between -\$2,848 and +\$1,395**, indicating that the model performs reasonably well for a majority of individuals.
+
+The median residual is slightly negative at **-\$982**, suggesting a slight over prediction on overage. However, the maximum residual of **nearly +\$30,000** shows that there are some patients whose medical costs are far beyond the models prediction, likely due to an extreme high risk profile. Give this large variation in residuals, this model has room for improvement.
+
+#### **Coefficient Summary:**
+
+The coefficient estimates measure the expected change in annual medical charges for a one unit increase in each predictor, holding all other variables constant. Smoking status has by far the largest effectm, with smokers incurring approximately **\$23,848** more in medical charges than non smokers on average.
+
+This is a highly significant and practically important increase. Age and BMI also have statistically significant positive effect, with charges increasing by about **\$257** per additional year of age and **\$339** per additional BMI unit. The number of children shows an impact of about **\$476** per additional child, suggesting limited relevance like region and sex.
+
+In Contrast, sex does not significantly influence charges, with a **p value of 0.69,** and the regional effects are relatively small and inconsistent. Given regional location and sex have high p values, this indicates lifestyle and health related factors are primary drivers of medical spending. This is especially true when the p values are **below 0.05 with age, BMI, and smoking.**
+
+#### **Model Fit Summary:**
+
+The Residual Standard Error (RSE) is the average prediction error. This factor shows how far predictions are from their true charges, and for a **variance of 75%** the model is only off by **+-\$6062**. This is good for the amount of observations and range of medical charges in this dataset. R-Squared as the variation covered in this model is relatively large for real world healthcare spending data too. The adjusted R-Squared is nearly identical indicating most predictors contribute to predictions and does so without over fitting, however it could be improved. The F-Statistic shows the model is significant overall, meaning that the predictors jointly improve the ability to explain medical expenses far better than a model with no predictors.
+
+### **Reduced Linear Regression**
+
+Using the summary of the standard Linear Regression Model, including the lowest p values, a reduced Linear Regression Model can be implemented with only the most contributing factors.
+
+This model will only include charges as the target, and Age, BMI, and Smoking as predictors.
+
+**Reduced Model Summary:**
+
+```{r Reduced Model, echo=FALSE}
+
+model2 <- lm(charges ~ age + bmi + smoker, data = dataset)
+
+summary(model2)
+```
+
+The Reduced Linear Regression Model includes only three key predictors of medical charges: **age**, **BMI**, and **smoking status**. All variables remain highly statistically significant (p \< 2e-16), indicating strong evidence that each one influences medical spending. Smoking has the largest impact, with smokers paying an estimated **\$23,824 more per year** than non-smokers. Increases in age and BMI are also associated with higher charges, adding approximately **\$259** and **\$323** respectively for each additional unit.
+
+The model explains **74.75% of the variation** in medical charges (R² = 0.7475), which is only slightly lower than the full model that included additional predictors. The Residual Standard Error of **\$6,092** shows that prediction errors remain similar in magnitude to those from the full model, indicating that removing sex, region, and number of children did **not** result in a meaningful loss of accuracy.
+
+Overall, the reduced model is a more efficient and interpretative model that preserves strong predictive performance while focusing on the most impactful health-related variables.
+
+### LASSO Regression
+
+```{r Lasso Regression, echo=FALSE}
+
+#Seperate Dataset into predictors and target
+
+#Using glmnet package, it expects a numeric matrix X (predictors)
+#Using glmnet package, it expects a vectior y as the response
+#model matrix creates dummy variables 
+X <- model.matrix(charges ~ age + bmi + smoker + children + region + sex, data = dataset)[, -1]
+y <- dataset$charges
+
+set.seed(123) # Remove Variability
+
+#Cross Validatrion for best parameter lambda in the model, automatically does k-fold
+lasso_cv <- cv.glmnet(X, y, alpha=1)
+
+#Take best lambda 
+cat("Cross Validation for The Best Parameter:\n")
+
+cat("The Simplest Good Model:\n This is the largest lambda within 1 standard error of the minimum")
+lasso_cv$lambda.1se #Simplist - one standard error from the minimum error
+
+cat("The Most Accurate LASSO Model:\n This is the lmabda value that produces the lowest cross validated error")
+lasso_cv$lambda.min #Lowest Cross Validation error - lambda value
+
+cat("Below are the LASSO coefficients using the most accurate model:\n")
+coef(lasso_cv, s = "lambda.min")
+
+```
+
+**LASSO Regression Summary:**
+
+The LASSO regression was fitted using cross validation to identify the most important predictors of medical charges. Using lambda as our optimal penalty value, LASSO retained age, bmi, smoking status, and number of children as relevant predictors. Smoking like the standard and reduced linear model remained the strongest contributor, with smokers predicted to spend about \$23,659 more. Age and BMI remained strongly influential, consistent with the other models as well.
+
+The coefficients for sex and region northwest were shrunk to zero, indicating that these variables provide no meaningful value to the model. Southeast, and southwest remained present, but had little to now affect confirming regional differences have only minor effects. Overall, LASSO results support the reduced linear model by idenitifying age, bmi, and smoking as the primary drivers of medical charges, while suggesting demographic variables only have minor prediction accuracy contributions.
+
+## Focus Questions Answered
+
+The main objective of this project was to understand how lifestyle and demographic characteristics affect medical insurance costs. After this analysis and applying the dataset to a Linear Regression Model in multiple ways:
+
+-   Which variables are the strongest predictors in medical insurance charges?
+
+    -   The most influential predictors in this dataset are age, BMI, and smoking. These predictors represented the greatest influential factors contributing to medical charges with p values nearly at zero. Analyzing these predictors by a per unit margin, age showcased a \$257 increase per unit of age, a \$339 increase per unit of bmi, and a \$23,000+ charge if individuals are smokers.
+
+-   How much does smoking impact medical cost compared to nonsmokers?
+
+    -   Smoking is the primary driver of medical cost in this dataset, and the model estimated that smokers incur over \$23,000 more compared to that of a nonsmoker. This dramatic difference suggest smoking is the most important behavioral factor influencing medical costs in this dataset.
+
+-   Does any variable have a linear relationship with insurance costs?
+
+    -   There were two variables that had a prominent linear relationship with insurance cost. This distinction was strong and clear when analyzing scatter plots, and the strength of their coefficients. These two variables were Age, and BMI, both of which showed a positive linear associated in a per unit margin. These findings align with medical expectations as greater age and NMI correlate to increased health risks and as a result more medical charges.
+
+-   Which variables best predict medical insurance charges, and accurately can a regression model explain variations in cost?
+
+    -   The variables that best predict medical insurance charges are smoking, BMI, and age. The reduced linear regression model explained 74.75% of the variation in medical charges (R² = 0.7475), with all predictors highly significant (p \< 2e-16). Smoking produced the largest effect, increasing annual charges by more than \$23,800, while BMI and age contributed moderate linear increases. LASSO regression confirmed these findings by selecting the same three predictors and shrinking sex and region coefficients to zero. Overall, age, BMI, and smoking are the dominant drivers of medical cost in this dataset.
+
+## Conclusion
+
+In summary, this analysis shows that medical insurance charges are primarily driven by three key factors: smoking status, BMI, and age. The reduced linear regression model explained nearly 75% of the variation in medical costs (R² = 0.7475), with all three predictors showing strong statistical significance. Smoking had the largest impact, increasing charges by more than \$23,000, while both age and BMI demonstrated clear linear relationships with cost. LASSO regression confirmed these findings by selecting the same predictors and shrinking less informative variables, such as sex and region, toward zero. Overall, the results indicate that lifestyle and health-related variables are far more important than demographic characteristics in determining medical insurance expenses.
+
+## References
+
+Badrali, Mehmet. “*Linear Regression in R: A Step-by-Step Guide*.” *DataCamp*, <https://www.datacamp.com/tutorial/linear-regression-R>.
+
+“LASSO Regression in R (Step-by-Step).” *Statology*, <https://www.statology.org/lasso-regression-in-r/>.
+
+James, Gareth, et al. *An Introduction to Statistical Learning*. 2nd ed., Springer, 2021.
+
+Mirichoi0218. “*Medical Cost Personal Dataset*.” *Kaggle*, <https://www.kaggle.com/datasets/mirichoi0218/insurance/data>.
+
+Wei, Taiyun, and Viliam Šimko. “*corrplot: Visualization of a Correlation Matrix*.” *CRAN*, 2024, <https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html>.
